@@ -1,0 +1,91 @@
+h1,
+p {
+  font-family: Lato;
+}
+
+:root {
+  /*--cell-size: 30px;*/
+  --cell-margin: 1px;
+  --cell-height: 25px; /*calc(var(--cell-size) * 0.7);*/
+  --cell-width: 30px; /*calc(var(--cell-size) * 1);*/
+  --cell-height-outer: calc(var(--cell-height) + var(--cell-margin));
+  --cell-width-outer: calc(var(--cell-width) + var(--cell-margin));
+  --cell-overlap: calc(var(--cell-width-outer) / 4 * (-1));
+  --cell-translate: calc(var(--cell-height-outer) / 2);
+}
+
+body {
+  background-color: black;
+  margin: 0px;
+}
+
+.hexgame {
+  height: 100vh;
+  display: flex;
+}
+
+.boardOuter {
+  flex: 1;
+  display: flex;
+  perspective: 2000px;
+  perspective-origin: 50% 50%;
+  overflow: hidden;
+  /*margin: 50px;*/
+}
+.board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: calc(var(--cell-width-outer) / 3);
+  padding-top: 2px;
+  overflow: auto;
+  /*transform: rotateX(25deg) rotateZ(15deg);*/
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+.cellOuter {
+  margin-left: var(--cell-overlap);
+  height: var(--cell-height-outer);
+  width: var(--cell-width-outer);
+  min-width: var(--cell-width-outer);
+  background-color: rgb(0, 7, 7);
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+.cell {
+  height: var(--cell-height);
+  width: var(--cell-width);
+  min-width: var(--cell-width);
+  background-color: rgb(83, 161, 235);
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+.cell:hover {
+  background-color: rgb(226, 236, 88);
+}
+.cellOuter.odd {
+  transform: translateY(var(--cell-translate));
+}
+.cellOuter.activated .cell {
+  background-color: rgb(233, 236, 88);
+}
+.cellOuter.selected {
+  background-color: rgb(236, 98, 88);
+  z-index: 100;
+}
+
+.gamePanel {
+  width: 30vw;
+  background-color: whitesmoke;
+  margin: 10px;
+  border-radius: 5px;
+}
