@@ -4,6 +4,7 @@ import { Observable, Subject, Subscription } from 'rxjs';
 import { CellModel, BoardModel } from '../model/cell-models';
 import { Cell } from './cell-view';
 import { Point, Location, Tile, HexTile, Line } from '../model/geom';
+import { AssetsLoader } from '../services/assets-loader';
 
 interface BoardProps {
   boardModel: BoardModel;
@@ -25,12 +26,18 @@ export class Board extends Component<BoardProps, BoardState> {
   tileH = 10;
   scaleFactor = 2;
 
+  assetsLoader: AssetsLoader;
+
   constructor(props: BoardProps) {
     super(props);
     this.state = {
       boardModel: this.props.boardModel,
     };
     this.myCanvas = React.createRef<HTMLCanvasElement>();
+    this.assetsLoader = new AssetsLoader();
+    this.assetsLoader.initialize().then(() => {
+      console.log('loaded');
+    });
   }
 
   render() {
@@ -53,7 +60,7 @@ export class Board extends Component<BoardProps, BoardState> {
     this.setUpDragging(canvas);
   }
 
-  private setCanvasDim(canvas) {
+  private setCanvasDim(canvas: HTMLCanvasElement) {
     var boundingRect = canvas.getBoundingClientRect();
     this.origin = new Point(boundingRect.left, boundingRect.top);
     canvas.height = canvas.clientHeight;
@@ -173,12 +180,18 @@ export class Board extends Component<BoardProps, BoardState> {
   }
 
   private drawHex(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
+    ctx.save(); 
     ctx.fillStyle = 'green';
-    hexTile
+    const p = hexTile
       .getPolygon()
       .scale(this.tileW, this.tileH)
       .zoom(this.scaleFactor)
-      .add(this.viewPosition)
-      .drawInto(ctx);
+      .add(this.viewPosition);
+
+    //ctx.fill(p.path());
+    ctx.clip(p.path());
+    ctx.fillStyle = 'blue';
+    ctx.drawImage(this.assetsLoader.tileMap,0,0);
+    ctx.restore();
   }
 }

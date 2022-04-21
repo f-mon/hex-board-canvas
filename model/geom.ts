@@ -242,14 +242,14 @@ class HexPolygon {
     return new HexPolygon(this.points.map((p) => p.add(translate)));
   }
 
-  drawInto(ctx: CanvasRenderingContext2D) {
+  path(): Path2D {
     const [first, ...others] = this.points;
-    ctx.beginPath();
-    ctx.moveTo(first.x, first.y);
+    const path = new Path2D();
+    path.moveTo(first.x, first.y);
     for (let p of others) {
-      ctx.lineTo(p.x, p.y);
+      path.lineTo(p.x, p.y);
     }
-    ctx.closePath();
-    ctx.fill();
+    path.closePath();
+    return path;
   }
 }
