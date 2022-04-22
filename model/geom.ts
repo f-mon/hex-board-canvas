@@ -204,6 +204,10 @@ export class Rect {
     );
   }
 
+  zoom(zoomFActor: number): Rect {
+    return this.scale(zoomFActor, zoomFActor);
+  }
+
   minus(translate: Point): Rect {
     return new Rect(
       this.upperLeft.minus(translate),

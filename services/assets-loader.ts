@@ -1,6 +1,10 @@
+import { Rect } from '../model/geom';
+
 export class AssetsLoader {
   tileMap: HTMLImageElement;
   private _loaded: boolean = false;
+
+  readonly tiles: HTMLCanvasElement[] = [];
 
   constructor() {}
 
@@ -15,6 +19,28 @@ export class AssetsLoader {
 
   get loaded(): boolean {
     return this.loaded;
+  }
+
+  createMapTile(rect: Rect) {
+    const tileMapCanvas = document.createElement('canvas');
+    tileMapCanvas.width = rect.width;
+    tileMapCanvas.height = rect.height;
+    const ctx = tileMapCanvas.getContext('2d');
+    console.log(rect);
+    ctx.drawImage(
+      this.tileMap,
+      rect.upperLeft.x,
+      rect.upperLeft.y,
+      rect.width,
+      rect.height,
+      0,
+      0,
+      rect.width,
+      rect.height
+    );
+    this.tiles.push(tileMapCanvas);
+    console.log(this.tiles);
+    document.body.appendChild(tileMapCanvas);
   }
 
   imageLoad(imgSrc: string): Promise<HTMLImageElement> {

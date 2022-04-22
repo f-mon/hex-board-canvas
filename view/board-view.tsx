@@ -58,6 +58,7 @@ export class Board extends Component<BoardProps, BoardState> {
     this.setUpOverPositionTracking(canvas);
     this.setUpOverZoomTracking(canvas);
     this.setUpDragging(canvas);
+    this.setUpClick(canvas);
   }
 
   private setCanvasDim(canvas: HTMLCanvasElement) {
@@ -80,6 +81,10 @@ export class Board extends Component<BoardProps, BoardState> {
     }
   }
 
+  getHexTileFromMapPosition(position: Point): HexTile {
+    return Tile.ofPosition(position).calcHexTile(position);
+  }
+
   setUpOverPositionTracking(canvas: HTMLCanvasElement) {
     canvas.addEventListener('mousemove', (event) => {
       this.hoverPosition = Point.ofRelative(event, this.origin)
@@ -88,6 +93,30 @@ export class Board extends Component<BoardProps, BoardState> {
         .inverseScale(this.tileW, this.tileH);
       this.redraw(canvas);
     });
+  }
+
+  setUpClick(canvas: HTMLCanvasElement) {
+    canvas.addEventListener(
+      'dblclick',
+      (event) => {
+        const clickPosition = Point.ofRelative(event, this.origin)
+          .minus(this.viewPosition)
+          .inverseZoom(this.scaleFactor)
+          .inverseScale(this.tileW, this.tileH);
+        const hexTile = this.getHexTileFromMapPosition(clickPosition);
+
+        console.log('HexTile: ', hexTile);
+        const boundingRectCoords = hexTile
+          .getBoundingRect()
+          .scale(this.tileW, this.tileH)
+          .zoom(this.scaleFactor)
+          .add(this.viewPosition);
+
+        this.assetsLoader.createMapTile(boundingRectCoords);
+        //this.redraw(canvas);
+      },
+      false
+    );
   }
 
   setUpOverZoomTracking(canvas: HTMLCanvasElement) {
@@ -180,7 +209,7 @@ export class Board extends Component<BoardProps, BoardState> {
   }
 
   private drawHex(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
-    ctx.save(); 
+    ctx.save();
     ctx.fillStyle = 'green';
     const p = hexTile
       .getPolygon()
@@ -191,7 +220,7 @@ export class Board extends Component<BoardProps, BoardState> {
     //ctx.fill(p.path());
     ctx.clip(p.path());
     ctx.fillStyle = 'blue';
-    ctx.drawImage(this.assetsLoader.tileMap,0,0);
+    ctx.drawImage(this.assetsLoader.tileMap, 0, 0);
     ctx.restore();
   }
 }
