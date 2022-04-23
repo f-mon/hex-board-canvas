@@ -1,7 +1,14 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 
+export class TileType {
+  name: string;
+  canvas: HTMLCanvasElement;
+  index: number;
+}
+
 export class GameModel {
   public boardModel: BoardModel;
+
   public turn: number = 0;
   private _speed: number = 700;
 
@@ -108,6 +115,20 @@ export class GameModel {
         cell.notifyChanged();
       }
     });
+  }
+
+  private _selectedTypeType: TileType;
+
+  get selectedTypeType(): TileType {
+    return this._selectedTypeType;
+  }
+
+  isSelectedTileType(tileType: TileType): boolean {
+    return this._selectedTypeType === tileType;
+  }
+
+  selectTileType(tileType: TileType) {
+    this._selectedTypeType = tileType;
   }
 }
 

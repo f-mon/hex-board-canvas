@@ -14,6 +14,6 @@ interface AppHeaderState {}
 
 export class AppHeader extends Component<AppHeaderProps, AppHeaderState> {
   render() {
-    return <div className="appheader">12</div>;
+    return <div className="appheader">HexMap</div>;
   }
 }

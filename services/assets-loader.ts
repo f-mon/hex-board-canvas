@@ -1,17 +1,12 @@
 import { Observable, Subject } from 'rxjs';
+import { TileType } from '../model/cell-models';
 import { Rect } from '../model/geom';
-
-export class TileImage {
-  tileName: string;
-  canvas: HTMLCanvasElement;
-  index: number;
-}
 
 export class AssetsLoader {
   tileMap: HTMLImageElement;
   private _loaded: boolean = false;
 
-  readonly tiles: TileImage[] = [];
+  readonly tiles: TileType[] = [];
   private nextKey: number = 0;
 
   private updates = new Subject<any>();
@@ -46,7 +41,7 @@ export class AssetsLoader {
         );
         this.tiles.push({
           index: imgNum,
-          tileName: key,
+          name: key,
           canvas: canvasTile,
         });
       }
@@ -89,7 +84,7 @@ export class AssetsLoader {
     const tileName = 'tile_image_' + this.nextKey;
     this.tiles.push({
       index: this.nextKey,
-      tileName,
+      name,
       canvas: tileMapCanvas,
     });
     localStorage.setItem(tileName, tileMapCanvas.toDataURL());

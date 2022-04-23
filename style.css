@@ -10,6 +10,7 @@ body,
   margin: 0px;
   padding: 0px;
   overflow: hidden;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 :root {
@@ -133,5 +134,9 @@ body {
   flex-direction: column;
   align-items: center;
 }
-.tile-thumbnail {
+.tile-thumbnail:hover {
+  border: solid 1px yellow;
+}
+.tile-thumbnail.selected {
+  border: solid 1px red;
 }

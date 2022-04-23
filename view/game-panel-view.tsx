@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import { Observable, Subject, Subscription } from 'rxjs';
-import { CellModel, BoardModel, GameModel } from '../model/cell-models';
-import { AssetsLoader, TileImage } from '../services/assets-loader';
+import {
+  CellModel,
+  BoardModel,
+  GameModel,
+  TileType,
+} from '../model/cell-models';
+import { AssetsLoader } from '../services/assets-loader';
 
 interface GamePanelState {
   gameModel: GameModel;
@@ -82,15 +87,29 @@ export class GamePanel extends Component<any, GamePanelState> {
     );
   }
 
-  renderTileDiv(tileImage: TileImage) {
+  toggleSelectTile(tileType: TileType) {
+    if (this.state.gameModel.isSelectedTileType(tileType)) {
+      this.state.gameModel.selectTileType(null);
+    } else {
+      this.state.gameModel.selectTileType(tileType);
+    }
+    this.setState(this.state);
+  }
+
+  renderTileDiv(tileImage: TileType) {
     const src = tileImage.canvas.toDataURL();
+    const isSelected = this.state.gameModel.isSelectedTileType(tileImage);
     return (
-      <div className="tile-thumbnail" key={tileImage.tileName}>
+      <div
+        className={'tile-thumbnail ' + (isSelected ? 'selected ' : '')}
+        onClick={() => this.toggleSelectTile(tileImage)}
+        key={tileImage.name}
+      >
         <img
           width={this.state.gameModel.boardModel.hexW * 2.5}
           height={this.state.gameModel.boardModel.hexH * 2.5}
           src={src}
-          title={tileImage.tileName}
+          title={tileImage.name}
         />
       </div>
     );

@@ -222,10 +222,32 @@ export class Board extends Component<BoardProps, BoardState> {
       .zoom(this.scaleFactor)
       .add(this.viewPosition);
 
-    //ctx.fill(p.path());
-    ctx.clip(p.path());
-    ctx.fillStyle = 'blue';
-    ctx.drawImage(this.assetsLoader.tileMap, 0, 0);
-    ctx.restore();
+    const tt = this.state.boardModel.gameModel.selectedTypeType;
+    if (tt) {
+      ctx.clip(p.path());
+      const rect = hexTile
+        .getBoundingRect()
+        .scale(this.tileW, this.tileH)
+        .zoom(this.scaleFactor)
+        .add(this.viewPosition);
+      ctx.drawImage(
+        tt.canvas,
+        0,
+        0,
+        tt.canvas.width,
+        tt.canvas.height,
+        rect.upperLeft.x,
+        rect.upperLeft.y,
+        rect.width,
+        rect.height
+      );
+      ctx.restore();
+    } else {
+      //ctx.fill(p.path());
+      ctx.clip(p.path());
+      ctx.drawImage(this.assetsLoader.tileMap,0,0);
+      ctx.restore();
+    }
+
   }
 }
