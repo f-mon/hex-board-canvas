@@ -113,6 +113,8 @@ export class GameModel {
 
 export class BoardModel {
   cells: CellModel[][];
+  readonly tileW: number = 20;
+  readonly tileH: number = 10;
 
   private _selection: Set<CellModel> = new Set();
 
@@ -124,6 +126,14 @@ export class BoardModel {
         return new CellModel(this, r, c);
       });
     });
+  }
+
+  get hexW(): number {
+    return this.tileW * 2;
+  }
+
+  get hexH(): number {
+    return this.tileH * 3;
   }
 
   getCell(row: number, col: number): CellModel | null {

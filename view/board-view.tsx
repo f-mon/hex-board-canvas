@@ -8,12 +8,14 @@ import { AssetsLoader } from '../services/assets-loader';
 
 interface BoardProps {
   boardModel: BoardModel;
+  assetsLoader: AssetsLoader;
 }
 interface BoardState {
   boardModel: BoardModel;
 }
 
 export class Board extends Component<BoardProps, BoardState> {
+  canvasContainer: React.RefObject<HTMLDivElement>;
   myCanvas: React.RefObject<HTMLCanvasElement>;
 
   origin: Point;
@@ -22,8 +24,8 @@ export class Board extends Component<BoardProps, BoardState> {
   // in map coordinates
   hoverPosition: Point;
 
-  tileW = 20;
-  tileH = 10;
+  readonly tileW: number;
+  readonly tileH: number;
   scaleFactor = 2;
 
   assetsLoader: AssetsLoader;
@@ -34,15 +36,15 @@ export class Board extends Component<BoardProps, BoardState> {
       boardModel: this.props.boardModel,
     };
     this.myCanvas = React.createRef<HTMLCanvasElement>();
-    this.assetsLoader = new AssetsLoader();
-    this.assetsLoader.initialize().then(() => {
-      console.log('loaded');
-    });
+    this.canvasContainer = React.createRef<HTMLDivElement>();
+    this.assetsLoader = this.props.assetsLoader;
+    this.tileW = this.state.boardModel.tileW;
+    this.tileH = this.state.boardModel.tileH;
   }
 
   render() {
     return (
-      <div className="boardOuter">
+      <div ref={this.canvasContainer} className="boardOuter">
         <canvas ref={this.myCanvas} className="board"></canvas>
       </div>
     );
@@ -51,21 +53,24 @@ export class Board extends Component<BoardProps, BoardState> {
   componentDidMount() {
     const canvas = this.myCanvas.current as HTMLCanvasElement;
     const resizeObserver = new ResizeObserver((entries) => {
-      this.setCanvasDim(canvas);
+      this.setCanvasDim(canvas, entries[0].target.getBoundingClientRect());
       this.redraw(canvas);
     });
-    resizeObserver.observe(canvas);
+    resizeObserver.observe(canvas); //this.canvasContainer.current);
     this.setUpOverPositionTracking(canvas);
     this.setUpOverZoomTracking(canvas);
     this.setUpDragging(canvas);
     this.setUpClick(canvas);
   }
 
-  private setCanvasDim(canvas: HTMLCanvasElement) {
-    var boundingRect = canvas.getBoundingClientRect();
+  private setCanvasDim(
+    canvas: HTMLCanvasElement,
+    boundingRect: DOMRectReadOnly
+  ) {
+    //var boundingRect = canvas.getBoundingClientRect();
     this.origin = new Point(boundingRect.left, boundingRect.top);
-    canvas.height = canvas.clientHeight;
-    canvas.width = canvas.clientWidth;
+    canvas.height = boundingRect.height;
+    canvas.width = boundingRect.width;
   }
 
   get hoverTile(): Tile {

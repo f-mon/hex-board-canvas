@@ -2,12 +2,15 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { CellModel, BoardModel, GameModel } from '../model/cell-models';
+import { AssetsLoader, TileImage } from '../services/assets-loader';
 
 interface GamePanelState {
   gameModel: GameModel;
 }
 
 export class GamePanel extends Component<any, GamePanelState> {
+  assetsLoader: AssetsLoader;
+
   constructor(props: any) {
     super(props);
     const gameModel: GameModel = this.props.gameModel;
@@ -17,6 +20,12 @@ export class GamePanel extends Component<any, GamePanelState> {
     gameModel.onUpdate().subscribe((gm: GameModel) => {
       this.setState({
         gameModel: gm,
+      });
+    });
+    this.assetsLoader = this.props.assetsLoader;
+    this.assetsLoader.onUpdate().subscribe(() => {
+      this.setState({
+        gameModel: this.state.gameModel,
       });
     });
   }
@@ -65,24 +74,24 @@ export class GamePanel extends Component<any, GamePanelState> {
           Selected:<b>{boardModel.selection.size}</b>
           <button onClick={this.clearSelection}>Clear Selection</button>
         </div>
-        <div>{this.state.gameModel.turn}</div>
-        <div>
-          <button onClick={this.onStartStopClick}>Start/Stop</button>
+
+        <div className="tiles-list">
+          {this.assetsLoader.tiles.map((c) => this.renderTileDiv(c))}
         </div>
-        <div>
-          Color:{' '}
-          <input
-            type="color"
-            onChange={(e) => this.setSelectionColor(e.target.value)}
-          ></input>
-          <button onClick={this.applySelectionColor}>Apply Color</button>
-        </div>
-        <div>
-          <button onClick={this.onSave}>Save</button>
-        </div>
-        <div>
-          <button onClick={this.onReLoad}>ReLoad</button>
-        </div>
+      </div>
+    );
+  }
+
+  renderTileDiv(tileImage: TileImage) {
+    const src = tileImage.canvas.toDataURL();
+    return (
+      <div className="tile-thumbnail" key={tileImage.tileName}>
+        <img
+          width={this.state.gameModel.boardModel.hexW * 2.5}
+          height={this.state.gameModel.boardModel.hexH * 2.5}
+          src={src}
+          title={tileImage.tileName}
+        />
       </div>
     );
   }

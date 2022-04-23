@@ -3,8 +3,18 @@ p {
   font-family: Lato;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+}
+
 :root {
   /*--cell-size: 30px;*/
+  --t-color: rgb(34, 153, 34);
   --cell-margin: 1px;
   --cell-height: 25px; /*calc(var(--cell-size) * 0.7);*/
   --cell-width: 30px; /*calc(var(--cell-size) * 1);*/
@@ -13,6 +23,13 @@ p {
   --cell-overlap: calc(var(--cell-width-outer) / 4 * (-1));
   --cell-translate: calc(var(--cell-height-outer) / 2);
 }
+.loader {
+  color: var(--t-color);
+  margin: 10px;
+  padding: 10px;
+  border: solid 1px var(--t-color);
+  border-radius: 10px;
+}
 
 body {
   background-color: black;
@@ -20,8 +37,26 @@ body {
 }
 
 .hexgame {
-  height: 100vh;
   display: flex;
+  flex-direction: column;
+  position: relative;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.appheader {
+  color: var(--t-color);
+  border-bottom: solid 1px var(--t-color);
+  padding: 5px;
+}
+.hexgame-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
 .boardOuter {
@@ -30,15 +65,14 @@ body {
   perspective: 2000px;
   perspective-origin: 50% 50%;
   overflow: hidden;
-  /*margin: 50px;*/
+  margin: 5px;
+  max-height: 100vh;
 }
 .board {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding-left: calc(var(--cell-width-outer) / 3);
-  padding-top: 2px;
-  overflow: auto;
+  overflow: hidden;
   /*transform: rotateX(25deg) rotateZ(15deg);*/
 }
 
@@ -85,7 +119,19 @@ body {
 
 .gamePanel {
   width: 30vw;
-  background-color: whitesmoke;
-  margin: 10px;
+  color: var(--t-color);
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 5px;
   border-radius: 5px;
+  border: solid 1px var(--t-color);
+  overflow: auto;
+}
+
+.tiles-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tile-thumbnail {
 }
