@@ -190,8 +190,8 @@ export class Board extends Component<BoardProps, BoardState> {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //canvas.width = canvas.width;
 
-    this.drawGrid(ctx);
     this.drawHexCells(ctx);
+    this.drawGrid(ctx);
 
     //const hoverTile = this.hoverTile;
     const hoverHex = this.hoverHex;
@@ -216,7 +216,7 @@ export class Board extends Component<BoardProps, BoardState> {
   }
 
   private drawHexCell(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
-    const cell = this.state.boardModel.getCell(hexTile.col, hexTile.row);
+    const cell = this.state.boardModel.getCell(hexTile.row, hexTile.col);
     if (cell.tileType) {
       this.drawHexTileTerrain(hexTile, cell.tileType, ctx);
     }
