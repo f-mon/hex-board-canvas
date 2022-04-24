@@ -36,36 +36,12 @@ export class GamePanel extends Component<any, GamePanelState> {
   }
 
   clearSelection = () => {
-    this.state.gameModel.boardModel.clearCelection();
-  };
-
-  onStartStopClick = () => {
-    console.log('onStartStopClick');
-    if (!this.state.gameModel.running) {
-      this.state.gameModel.start();
-    } else {
-      this.state.gameModel.stop();
-    }
-  };
-
-  applySelectionColor = () => {
-    this.state.gameModel.boardModel.selection.forEach((cell) => {
-      cell.backgroundColor = this.colorVal;
-      cell.notifyChanged();
-    });
+    this.state.gameModel.boardModel.clearSelection();
   };
 
   colorVal: string;
   setSelectionColor = (colorVal: string) => {
     this.colorVal = colorVal;
-  };
-
-  onSave = () => {
-    this.state.gameModel.exportAndSaveState();
-  };
-
-  onReLoad = () => {
-    this.state.gameModel.reloadState();
   };
 
   render() {

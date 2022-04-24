@@ -1,4 +1,5 @@
 import { Observable, Subject, Subscription } from 'rxjs';
+import { Tile } from './geom';
 
 export class TileType {
   name: string;
@@ -9,20 +10,11 @@ export class TileType {
 export class GameModel {
   public boardModel: BoardModel;
 
-  public turn: number = 0;
-  private _speed: number = 700;
-
-  public running: boolean = false;
-  private scheduledTick: number;
+  private _selectedTileType: TileType;
 
   private updates = new Subject<GameModel>();
 
-  constructor(
-    speed: number,
-    public readonly rows: number,
-    public readonly cols: number
-  ) {
-    this._speed = speed;
+  constructor(public readonly rows: number, public readonly cols: number) {
     this.boardModel = new BoardModel(this);
   }
 
@@ -34,108 +26,39 @@ export class GameModel {
     this.updates.next(this);
   }
 
-  tick() {
-    if (!this.running) {
-      return;
-    }
-    this.turn++;
-    const updateCells: boolean[][] = [];
-    for (let row of this.boardModel.cells) {
-      const updateRow: any[] = [];
-      updateCells.push(updateRow);
-      for (let cell of row) {
-        updateRow.push(cell.calcNextState());
-      }
-    }
-    for (let r = 0; r < this.boardModel.cells.length; r++) {
-      for (let c = 0; c < this.boardModel.cells[r].length; c++) {
-        const cell = this.boardModel.cells[r][c];
-        const prevActive = cell.active;
-        cell.active = updateCells[r][c];
-        if (prevActive !== cell.active) {
-          cell.notifyChanged();
-        }
-      }
-    }
-    this.notifyChanged();
-  }
-
-  start() {
-    if (this.running) {
-      return;
-    }
-    this.running = true;
-    this.scheduledTick = setInterval(() => this.tick(), this._speed);
-  }
-
-  stop() {
-    if (!this.running) {
-      return;
-    }
-    if (this.scheduledTick) {
-      clearInterval(this.scheduledTick);
-    }
-    this.running = false;
-  }
-
-  exportAndSaveState() {
-    const mem = this.exportState();
-    localStorage.setItem('boardState', JSON.stringify(mem));
-  }
-
-  exportState() {
-    const state: any = {};
-    this.boardModel.cells.forEach((row) => {
-      row.forEach((cell) => {
-        if (cell.backgroundColor) {
-          state[cell.key] = {
-            backgroundColor: cell.backgroundColor,
-          };
-        }
-      });
-    });
-    return state;
-  }
-
-  reloadState() {
-    const mem = localStorage.getItem('boardState');
-    if (mem) {
-      const parsedMem = JSON.parse(mem);
-      this.loadState(parsedMem);
-    }
-    this.notifyChanged();
-  }
-
-  loadState(state: { [cellKey: string]: any }) {
-    Object.keys(state).forEach((key) => {
-      const loc = CellModel.getLocationFromKey(key);
-      const cell = this.boardModel.getCell(loc.row, loc.col);
-      if (cell) {
-        cell.backgroundColor = state[key].backgroundColor;
-        cell.notifyChanged();
-      }
-    });
-  }
-
-  private _selectedTypeType: TileType;
-
-  get selectedTypeType(): TileType {
-    return this._selectedTypeType;
+  get selectedTileType(): TileType {
+    return this._selectedTileType;
   }
 
   isSelectedTileType(tileType: TileType): boolean {
-    return this._selectedTypeType === tileType;
+    return this._selectedTileType === tileType;
   }
 
   selectTileType(tileType: TileType) {
-    this._selectedTypeType = tileType;
+    this._selectedTileType = tileType;
   }
+
+  isDrawingMapState(): boolean {
+    return !!this._selectedTileType;
+  }
+
+  isEditTilesPaletteState(): boolean {
+    return !this._selectedTileType;
+  }
+
+  setCellTileType(row: number, col: number, tileType: TileType) {
+    const cell = this.boardModel.getCell(row, col);
+    cell.setTileType(this._selectedTileType);
+    this.saveStateToLocalStorage();
+  }
+
+  saveStateToLocalStorage() {}
 
   static reloadFromLocalStorage() {
     const mem = localStorage.getItem('game_model');
     if (mem) {
       const pMem = JSON.parse(mem);
-      const restoredGame = new GameModel(pMem.speed, pMem.rows, pMem.cols);
+      const restoredGame = new GameModel(pMem.rows, pMem.cols);
       for (let r = 0; r < pMem.cells.length; r++) {
         for (let c = 0; c < pMem.cells[r].length; c++) {
           const pCell = pMem.cells[r][c];
@@ -146,7 +69,7 @@ export class GameModel {
 
       return restoredGame;
     } else {
-      return new GameModel(500, 50, 50);
+      return new GameModel(50, 50);
     }
   }
 }
@@ -206,7 +129,7 @@ export class BoardModel {
     }
   }
 
-  clearCelection() {
+  clearSelection() {
     this._selection.forEach((cell) => {
       this._selection.delete(cell);
       cell.notifyChanged();
@@ -245,8 +168,7 @@ export enum CellDirection {
 }
 
 export class CellModel {
-  active: boolean;
-  backgroundColor: string;
+  private _tileType: TileType;
 
   key: string;
 
@@ -260,48 +182,8 @@ export class CellModel {
     this.key = 'cell_' + this.row + '_' + this.col;
   }
 
-  static getLocationFromKey(cellKey: string): {
-    row: number;
-    col: number;
-  } {
-    const sepIdx = cellKey.indexOf('_', 5);
-    const row = parseInt(cellKey.substr(5, sepIdx));
-    const col = parseInt(cellKey.substr(sepIdx + 1));
-    return {
-      row: row,
-      col: col,
-    };
-  }
-
   onUpdate(): Observable<CellModel> {
     return this.updates;
-  }
-
-  calcNextState(): boolean {
-    const activatedNear = this.getNearCells().filter(
-      (cell) => cell.active
-    ).length;
-    if (activatedNear === 2) {
-      return this.active;
-    }
-    if (activatedNear === 3) {
-      return true;
-    }
-    if (activatedNear === 4) {
-      return this.active;
-    }
-    return false;
-  }
-
-  activate(activateNears?: boolean) {
-    this.active = true;
-
-    this.notifyChanged();
-    if (activateNears !== false) {
-      const nearCells = this.getNearCells();
-      console.log('nearCells ', nearCells);
-      nearCells.forEach((cell) => cell.activate(false));
-    }
   }
 
   notifyChanged() {
@@ -338,5 +220,13 @@ export class CellModel {
     return Object.values(CellDirection)
       .map((dir) => this.getCell(dir))
       .filter((cell) => !!cell);
+  }
+
+  get tileType(): TileType {
+    return this._tileType;
+  }
+
+  setTileType(tileType: TileType) {
+    this._tileType = tileType;
   }
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import { Observable, Subject, Subscription } from 'rxjs';
-import { CellModel, BoardModel } from '../model/cell-models';
+import { CellModel, BoardModel, TileType } from '../model/cell-models';
 import { Cell } from './cell-view';
 import { Point, Location, Tile, HexTile, Line } from '../model/geom';
 import { AssetsLoader } from '../services/assets-loader';
@@ -104,24 +104,37 @@ export class Board extends Component<BoardProps, BoardState> {
     canvas.addEventListener(
       'dblclick',
       (event) => {
-        const clickPosition = Point.ofRelative(event, this.origin)
-          .minus(this.viewPosition)
-          .inverseZoom(this.scaleFactor)
-          .inverseScale(this.tileW, this.tileH);
-        const hexTile = this.getHexTileFromMapPosition(clickPosition);
+        const gameModel = this.state.boardModel.gameModel;
+        if (gameModel.isDrawingMapState()) {
+          const hexTile = this.getHexTileOfMouseEvent(event);
+          gameModel.setCellTileType(
+            hexTile.row,
+            hexTile.col,
+            gameModel.selectedTileType
+          );
+        }
+        if (gameModel.isEditTilesPaletteState()) {
+          const hexTile = this.getHexTileOfMouseEvent(event);
+          const boundingRectCoords = hexTile
+            .getBoundingRect()
+            .scale(this.tileW, this.tileH)
+            .zoom(this.scaleFactor)
+            .add(this.viewPosition);
 
-        console.log('HexTile: ', hexTile);
-        const boundingRectCoords = hexTile
-          .getBoundingRect()
-          .scale(this.tileW, this.tileH)
-          .zoom(this.scaleFactor)
-          .add(this.viewPosition);
-
-        this.assetsLoader.createMapTile(boundingRectCoords);
-        //this.redraw(canvas);
+          this.assetsLoader.createMapTile(boundingRectCoords);
+        }
       },
       false
     );
+  }
+
+  getHexTileOfMouseEvent(event: MouseEvent): HexTile {
+    const eventMapPosition = Point.ofRelative(event, this.origin)
+      .minus(this.viewPosition)
+      .inverseZoom(this.scaleFactor)
+      .inverseScale(this.tileW, this.tileH);
+    const hexTile = this.getHexTileFromMapPosition(eventMapPosition);
+    return hexTile;
   }
 
   setUpOverZoomTracking(canvas: HTMLCanvasElement) {
@@ -176,34 +189,55 @@ export class Board extends Component<BoardProps, BoardState> {
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //canvas.width = canvas.width;
-    const HEX_ROWS = 50;
-    const HEX_COLS = 50;
-    const ROWS = HEX_ROWS * 2 + 1;
-    const COLS = HEX_COLS * 2;
 
-    ctx.lineWidth = 1;
-    ctx.fillStyle = 'white';
-    ctx.strokeStyle = 'white';
+    this.drawGrid(ctx);
+    this.drawHexCells(ctx);
 
     //const hoverTile = this.hoverTile;
     const hoverHex = this.hoverHex;
-
-    ctx.beginPath();
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        const tile = new Tile(r, c);
-        this.drawGrid(tile, ctx);
-      }
-    }
-    ctx.stroke();
 
     if (hoverHex) {
       this.drawHex(hoverHex, ctx);
     }
   }
 
-  private drawGrid(tile: Tile, ctx: CanvasRenderingContext2D) {
-    let line = tile.getGridLine();
+  private drawHexCells(ctx: CanvasRenderingContext2D) {
+    const ROWS = this.state.boardModel.rows;
+    const COLS = this.state.boardModel.cols;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'white';
+    ctx.beginPath();
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const hexTile = new HexTile(r, c);
+        this.drawHexCell(hexTile, ctx);
+      }
+    }
+  }
+
+  private drawHexCell(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
+    const cell = this.state.boardModel.getCell(hexTile.col, hexTile.row);
+    if (cell.tileType) {
+    }
+  }
+
+  private drawGrid(ctx: CanvasRenderingContext2D) {
+    const ROWS = this.state.boardModel.rows * 2 + 1;
+    const COLS = this.state.boardModel.cols * 2;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'white';
+    ctx.beginPath();
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const tile = new Tile(r, c);
+        this.drawGridOnTile(tile, ctx);
+      }
+    }
+    ctx.stroke();
+  }
+
+  private drawGridOnTile(tile: Tile, ctx: CanvasRenderingContext2D) {
+    const line = tile.getGridLine();
     if (line) {
       line
         .scale(this.tileW, this.tileH)
@@ -214,40 +248,52 @@ export class Board extends Component<BoardProps, BoardState> {
   }
 
   private drawHex(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
+    if (this.state.boardModel.gameModel.isDrawingMapState()) {
+      const tt = this.state.boardModel.gameModel.selectedTileType;
+      this.drawHexTileTerrain(hexTile, tt, ctx);
+    } else {
+      //ctx.fill(p.path());
+      const p = this.getHexTilePolygonCoords(hexTile);
+      ctx.save();
+      ctx.clip(p.path());
+      ctx.drawImage(this.assetsLoader.tileMap, 0, 0);
+      ctx.restore();
+    }
+  }
+
+  private drawHexTileTerrain(
+    hexTile: HexTile,
+    tileType: TileType,
+    ctx: CanvasRenderingContext2D
+  ) {
+    const p = this.getHexTilePolygonCoords(hexTile);
     ctx.save();
-    ctx.fillStyle = 'green';
+    ctx.clip(p.path());
+    const rect = hexTile
+      .getBoundingRect()
+      .scale(this.tileW, this.tileH)
+      .zoom(this.scaleFactor)
+      .add(this.viewPosition);
+    ctx.drawImage(
+      tileType.canvas,
+      0,
+      0,
+      tileType.canvas.width,
+      tileType.canvas.height,
+      rect.upperLeft.x,
+      rect.upperLeft.y,
+      rect.width,
+      rect.height
+    );
+    ctx.restore();
+  }
+
+  private getHexTilePolygonCoords(hexTile: HexTile) {
     const p = hexTile
       .getPolygon()
       .scale(this.tileW, this.tileH)
       .zoom(this.scaleFactor)
       .add(this.viewPosition);
-
-    const tt = this.state.boardModel.gameModel.selectedTypeType;
-    if (tt) {
-      ctx.clip(p.path());
-      const rect = hexTile
-        .getBoundingRect()
-        .scale(this.tileW, this.tileH)
-        .zoom(this.scaleFactor)
-        .add(this.viewPosition);
-      ctx.drawImage(
-        tt.canvas,
-        0,
-        0,
-        tt.canvas.width,
-        tt.canvas.height,
-        rect.upperLeft.x,
-        rect.upperLeft.y,
-        rect.width,
-        rect.height
-      );
-      ctx.restore();
-    } else {
-      //ctx.fill(p.path());
-      ctx.clip(p.path());
-      ctx.drawImage(this.assetsLoader.tileMap,0,0);
-      ctx.restore();
-    }
-
+    return p;
   }
 }
