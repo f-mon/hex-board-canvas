@@ -130,6 +130,25 @@ export class GameModel {
   selectTileType(tileType: TileType) {
     this._selectedTypeType = tileType;
   }
+
+  static reloadFromLocalStorage() {
+    const mem = localStorage.getItem('game_model');
+    if (mem) {
+      const pMem = JSON.parse(mem);
+      const restoredGame = new GameModel(pMem.speed, pMem.rows, pMem.cols);
+      for (let r = 0; r < pMem.cells.length; r++) {
+        for (let c = 0; c < pMem.cells[r].length; c++) {
+          const pCell = pMem.cells[r][c];
+          const cellModel = restoredGame.boardModel.cells[r][c];
+          //cellModel.set;
+        }
+      }
+
+      return restoredGame;
+    } else {
+      return new GameModel(500, 50, 50);
+    }
+  }
 }
 
 export class BoardModel {

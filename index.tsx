@@ -6,4 +6,4 @@ import { createRoot } from 'react-dom/client';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-root.render(<HexGame speed={100} rows={50} cols={50} />);
+root.render(<HexGame />);

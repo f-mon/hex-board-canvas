@@ -16,31 +16,28 @@ export class HexGame extends Component<any, HexGameState> {
 
   constructor(props: any) {
     super(props);
-    const gameModel = new GameModel(
-      this.props.speed,
-      this.props.rows,
-      this.props.cols
-    );
     this.state = {
-      gameModel: gameModel,
+      gameModel: null,
     };
     this.assetsLoader = new AssetsLoader();
     this.assetsLoader.initialize().then(() => {
-      this.setState(this.state);
+      const gameModel = GameModel.reloadFromLocalStorage();
+      this.setState({
+        gameModel: gameModel,
+      });
     });
   }
 
-  componentDidMount() {
-    this.state.gameModel.reloadState();
-  }
-
   render() {
-    if (!this.assetsLoader.loaded) {
+    if (!this.assetsLoader.loaded || !this.state.gameModel) {
       return <div className="loader">Loading</div>;
     }
     return (
       <div className="hexgame">
-        <AppHeader />
+        <AppHeader
+          boardModel={this.state.gameModel.boardModel}
+          assetsLoader={this.assetsLoader}
+        />
         <div className="hexgame-container">
           <Board
             boardModel={this.state.gameModel.boardModel}
