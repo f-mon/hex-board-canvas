@@ -84,7 +84,7 @@ export class AssetsLoader {
     const tileName = 'tile_image_' + this.nextKey;
     this.tiles.push({
       index: this.nextKey,
-      name,
+      name: tileName,
       canvas: tileMapCanvas,
     });
     localStorage.setItem(tileName, tileMapCanvas.toDataURL());
@@ -104,5 +104,9 @@ export class AssetsLoader {
       );
       img.src = imgSrc;
     });
+  }
+
+  getTileTypeByName(tileTypeName: string): TileType {
+    return this.tiles.find((tt) => tt.name === tileTypeName);
   }
 }

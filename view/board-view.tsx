@@ -218,6 +218,7 @@ export class Board extends Component<BoardProps, BoardState> {
   private drawHexCell(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
     const cell = this.state.boardModel.getCell(hexTile.col, hexTile.row);
     if (cell.tileType) {
+      this.drawHexTileTerrain(hexTile, cell.tileType, ctx);
     }
   }
 

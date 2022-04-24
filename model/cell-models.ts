@@ -1,4 +1,5 @@
 import { Observable, Subject, Subscription } from 'rxjs';
+import { AssetsLoader } from '../services/assets-loader';
 import { Tile } from './geom';
 
 export class TileType {
@@ -54,7 +55,7 @@ export class GameModel {
 
   saveStateToLocalStorage() {}
 
-  static reloadFromLocalStorage() {
+  static reloadFromLocalStorage(assetsLoader: AssetsLoader) {
     const mem = localStorage.getItem('game_model');
     if (mem) {
       const pMem = JSON.parse(mem);
@@ -63,7 +64,7 @@ export class GameModel {
         for (let c = 0; c < pMem.cells[r].length; c++) {
           const pCell = pMem.cells[r][c];
           const cellModel = restoredGame.boardModel.cells[r][c];
-          //cellModel.set;
+          cellModel.setTileType(assetsLoader.getTileTypeByName(pCell.type));
         }
       }
 

@@ -21,7 +21,7 @@ export class HexGame extends Component<any, HexGameState> {
     };
     this.assetsLoader = new AssetsLoader();
     this.assetsLoader.initialize().then(() => {
-      const gameModel = GameModel.reloadFromLocalStorage();
+      const gameModel = GameModel.reloadFromLocalStorage(this.assetsLoader);
       this.setState({
         gameModel: gameModel,
       });
