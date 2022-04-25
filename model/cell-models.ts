@@ -132,6 +132,11 @@ export class GameModel {
       return new GameModel(50, 50);
     }
   }
+
+  togglePanel() {
+    this.showGamePanel = !this.showGamePanel;
+    this.notifyChanged();
+  }
 }
 
 export class BoardModel {

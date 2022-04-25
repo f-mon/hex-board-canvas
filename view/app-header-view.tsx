@@ -22,11 +22,16 @@ export class AppHeader extends Component<AppHeaderProps, AppHeaderState> {
       gameModel: this.props.gameModel,
       assetsLoader: this.props.assetsLoader,
     };
+    this.state.gameModel.onUpdate().subscribe((gm) => {
+      this.setState({
+        gameModel: gm,
+        assetsLoader: this.props.assetsLoader,
+      });
+    });
   }
 
   togglePanel = () => {
-    this.state.gameModel.showGamePanel = !this.state.gameModel.showGamePanel;
-    this.setState(this.state);
+    this.state.gameModel.togglePanel();
   };
 
   render() {
