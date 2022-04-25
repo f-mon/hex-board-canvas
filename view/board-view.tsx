@@ -54,7 +54,7 @@ export class Board extends Component<BoardProps, BoardState> {
     const canvas = this.myCanvas.current as HTMLCanvasElement;
     const resizeObserver = new ResizeObserver((entries) => {
       this.setCanvasDim(canvas, entries[0].target.getBoundingClientRect());
-      this.redraw(canvas);
+      this.redraw();
     });
     resizeObserver.observe(canvas); //this.canvasContainer.current);
     this.setUpOverPositionTracking(canvas);
@@ -96,7 +96,7 @@ export class Board extends Component<BoardProps, BoardState> {
         .minus(this.viewPosition)
         .inverseZoom(this.scaleFactor)
         .inverseScale(this.tileW, this.tileH);
-      this.redraw(canvas);
+      this.redraw();
     });
   }
 
@@ -155,7 +155,7 @@ export class Board extends Component<BoardProps, BoardState> {
         .add(this.viewPosition);
       const deltaZoom = movedZoomPoint.minus(zoomPoint);
       this.viewPosition = this.viewPosition.minus(deltaZoom);
-      this.redraw(canvas);
+      this.redraw();
     });
   }
 
@@ -168,7 +168,7 @@ export class Board extends Component<BoardProps, BoardState> {
       if (mode === 'DRAGGING') {
         const deltaDrag = Point.ofRelative(event, this.origin).minus(dragPoint);
         this.viewPosition = startPosition.add(deltaDrag);
-        this.redraw(canvas);
+        this.redraw();
       }
       if (mode === 'FILLING') {
         const hexTile = this.getHexTileOfMouseEvent(event);
@@ -180,7 +180,7 @@ export class Board extends Component<BoardProps, BoardState> {
             gameModel.selectedTileType
           )
         ) {
-          this.redraw(canvas);
+          this.redraw();
         }
       }
     });
@@ -204,7 +204,11 @@ export class Board extends Component<BoardProps, BoardState> {
     });
   }
 
-  redraw(canvas: HTMLCanvasElement) {
+  redraw() {
+    requestAnimationFrame(() => this.doRedraw(this.myCanvas.current));
+  }
+
+  private doRedraw(canvas: HTMLCanvasElement) {
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //canvas.width = canvas.width;
