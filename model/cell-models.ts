@@ -78,10 +78,13 @@ export class GameModel {
     return !this._selectedTileType;
   }
 
-  setCellTileType(row: number, col: number, tileType: TileType) {
+  setCellTileType(row: number, col: number, tileType: TileType): boolean {
     const cell = this.boardModel.getCell(row, col);
-    cell.setTileType(this._selectedTileType);
-    this.saveStateToLocalStorage();
+    if (cell.setTileType(this._selectedTileType)) {
+      this.saveStateToLocalStorage();
+      return true;
+    }
+    return false;
   }
 
   saveStateToLocalStorage() {}
@@ -258,7 +261,11 @@ export class CellModel {
     return this._tileType;
   }
 
-  setTileType(tileType: TileType) {
-    this._tileType = tileType;
+  setTileType(tileType: TileType): boolean {
+    if (this._tileType !== tileType) {
+      this._tileType = tileType;
+      return true;
+    }
+    return false;
   }
 }

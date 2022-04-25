@@ -160,27 +160,45 @@ export class Board extends Component<BoardProps, BoardState> {
   }
 
   setUpDragging(canvas: HTMLCanvasElement) {
-    let dragging = false;
+    let mode: 'DRAGGING' | 'FILLING' | null = null;
     let dragPoint: Point;
     let startPosition: Point;
+    const gameModel = this.state.boardModel.gameModel;
     canvas.addEventListener('mousemove', (event) => {
-      if (dragging) {
+      if (mode === 'DRAGGING') {
         const deltaDrag = Point.ofRelative(event, this.origin).minus(dragPoint);
         this.viewPosition = startPosition.add(deltaDrag);
         this.redraw(canvas);
       }
+      if (mode === 'FILLING') {
+        const hexTile = this.getHexTileOfMouseEvent(event);
+        if (
+          gameModel.setCellTileType(
+            hexTile.row,
+            hexTile.col,
+            gameModel.selectedTileType
+          )
+        ) {
+          this.redraw(canvas);
+        }
+      }
     });
     canvas.addEventListener('mousedown', (event) => {
-      dragging = true;
-      dragPoint = Point.ofRelative(event, this.origin);
-      startPosition = this.viewPosition;
+      if (gameModel.isEditTilesPaletteState()) {
+        mode = 'DRAGGING';
+        dragPoint = Point.ofRelative(event, this.origin);
+        startPosition = this.viewPosition;
+      }
+      if (gameModel.isDrawingMapState() && gameModel.selectedTileType) {
+        mode = 'FILLING';
+      }
     });
     canvas.addEventListener('mouseup', (event) => {
-      dragging = false;
+      mode = null;
       dragPoint = null;
     });
     canvas.addEventListener('mouseout', (event) => {
-      dragging = false;
+      mode = null;
       dragPoint = null;
     });
   }
