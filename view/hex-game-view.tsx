@@ -35,7 +35,7 @@ export class HexGame extends Component<any, HexGameState> {
     return (
       <div className="hexgame">
         <AppHeader
-          boardModel={this.state.gameModel.boardModel}
+          gameModel={this.state.gameModel}
           assetsLoader={this.assetsLoader}
         />
         <div className="hexgame-container">
@@ -43,10 +43,14 @@ export class HexGame extends Component<any, HexGameState> {
             boardModel={this.state.gameModel.boardModel}
             assetsLoader={this.assetsLoader}
           />
-          <GamePanel
-            gameModel={this.state.gameModel}
-            assetsLoader={this.assetsLoader}
-          />
+          {this.state.gameModel.showGamePanel ? (
+            <GamePanel
+              gameModel={this.state.gameModel}
+              assetsLoader={this.assetsLoader}
+            />
+          ) : (
+            ''
+          )}
         </div>
       </div>
     );

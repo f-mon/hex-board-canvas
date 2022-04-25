@@ -49,6 +49,7 @@ export class GameModel {
   public boardModel: BoardModel;
 
   private _selectedTileType: TileType;
+  showGamePanel: boolean = false;
 
   private updates = new Subject<GameModel>();
   private _saveStateToLocalStorage = new Subject();
