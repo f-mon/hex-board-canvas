@@ -37,6 +37,7 @@ export class AppHeader extends Component<AppHeaderProps, AppHeaderState> {
   render() {
     return (
       <div className="appheader">
+        <div className="spacer"></div>
         <button type="button" onClick={this.togglePanel}>
           {this.state.gameModel.showGamePanel ? 'Hide Panel' : 'Show Panel'}
         </button>

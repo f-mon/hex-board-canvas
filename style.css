@@ -53,7 +53,12 @@ body {
   color: var(--t-color);
   border-bottom: solid 1px var(--t-color);
   padding: 5px;
+  display: flex;
 }
+.spacer {
+  flex: 1;
+}
+
 .hexgame-container {
   display: flex;
   flex: 1;
