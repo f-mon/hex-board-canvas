@@ -1,6 +1,5 @@
-import { Observable, Subject, Subscription } from 'rxjs';
+import { debounceTime, Observable, Subject, Subscription } from 'rxjs';
 import { AssetsLoader } from '../services/assets-loader';
-import { Tile } from './geom';
 import { ImageUtils } from '../services/image-utils';
 
 export class TileType {
@@ -52,9 +51,13 @@ export class GameModel {
   private _selectedTileType: TileType;
 
   private updates = new Subject<GameModel>();
+  private _saveStateToLocalStorage = new Subject();
 
   constructor(public readonly rows: number, public readonly cols: number) {
     this.boardModel = new BoardModel(this);
+    this._saveStateToLocalStorage
+      .pipe(debounceTime(200))
+      .subscribe(() => this.doSaveStateToLocalStorage());
   }
 
   onUpdate(): Observable<GameModel> {
@@ -88,13 +91,28 @@ export class GameModel {
   setCellTileType(row: number, col: number, tileType: TileType): boolean {
     const cell = this.boardModel.getCell(row, col);
     if (cell && cell.setTileType(this._selectedTileType)) {
-      this.saveStateToLocalStorage();
+      this._saveStateToLocalStorage.next(true);
       return true;
     }
     return false;
   }
 
-  saveStateToLocalStorage() {}
+  private doSaveStateToLocalStorage() {
+    localStorage.setItem(
+      'game_model',
+      JSON.stringify({
+        rows: this.rows,
+        cols: this.cols,
+        cells: this.boardModel.cells.map((row, rowIndex) => {
+          return row.map((cell, colIndex) => {
+            return {
+              type: cell.tileType?.name,
+            };
+          });
+        }),
+      })
+    );
+  }
 
   static reloadFromLocalStorage(assetsLoader: AssetsLoader) {
     const mem = localStorage.getItem('game_model');
@@ -108,7 +126,6 @@ export class GameModel {
           cellModel.setTileType(assetsLoader.getTileTypeByName(pCell.type));
         }
       }
-
       return restoredGame;
     } else {
       return new GameModel(50, 50);
