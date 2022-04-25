@@ -7,7 +7,11 @@ export class TileType {
   constructor(
     public readonly index: number,
     public readonly canvas: HTMLCanvasElement
-  ) {}
+  ) {
+    if (!index || index === NaN) {
+      throw new Error();
+    }
+  }
 
   get name(): string {
     return 'tile_image_' + this.index;
@@ -27,6 +31,9 @@ export class TileType {
       const key = localStorage.key(i);
       if (key.startsWith('tile_image_')) {
         const index = parseInt(key.substring(11));
+        if (!index || index === NaN || index === Infinity) {
+          continue;
+        }
         const canvasTile = await ImageUtils.dataUrlToCanvas(
           localStorage.getItem(key)
         );

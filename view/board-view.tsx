@@ -173,6 +173,7 @@ export class Board extends Component<BoardProps, BoardState> {
       if (mode === 'FILLING') {
         const hexTile = this.getHexTileOfMouseEvent(event);
         if (
+          hexTile &&
           gameModel.setCellTileType(
             hexTile.row,
             hexTile.col,

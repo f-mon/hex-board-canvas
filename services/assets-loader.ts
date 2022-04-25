@@ -33,8 +33,10 @@ export class AssetsLoader {
 
   private async reloadTiles(): Promise<any> {
     const tiles = await TileType.reloadTilesFromLocalStorage();
-    this.nextKey = Math.max(...tiles.map((t) => t.index));
-    this._tiles = tiles;
+    if (tiles.length > 0) {
+      this.nextKey = Math.max(...tiles.map((t) => t.index));
+      this._tiles = tiles;
+    }
   }
 
   get tiles(): TileType[] {
