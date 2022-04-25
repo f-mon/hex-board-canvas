@@ -87,7 +87,7 @@ export class GameModel {
 
   setCellTileType(row: number, col: number, tileType: TileType): boolean {
     const cell = this.boardModel.getCell(row, col);
-    if (cell.setTileType(this._selectedTileType)) {
+    if (cell && cell.setTileType(this._selectedTileType)) {
       this.saveStateToLocalStorage();
       return true;
     }
