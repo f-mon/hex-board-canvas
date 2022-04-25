@@ -34,10 +34,23 @@ export class AppHeader extends Component<AppHeaderProps, AppHeaderState> {
     this.state.gameModel.togglePanel();
   };
 
+  toggleState = () => {
+    if (this.state.gameModel.isEditTilesPaletteState()) {
+      this.state.gameModel.setDrawingMapState();
+    } else {
+      this.state.gameModel.setEditTilesPaletteState();
+    }
+  };
+
   render() {
     return (
       <div className="appheader">
         <div className="spacer"></div>
+        <button type="button" onClick={this.toggleState}>
+          {this.state.gameModel.isEditTilesPaletteState()
+            ? 'Map Draw'
+            : 'Edit Tile Palette'}
+        </button>
         <button type="button" onClick={this.togglePanel}>
           {this.state.gameModel.showGamePanel ? 'Hide Panel' : 'Show Panel'}
         </button>

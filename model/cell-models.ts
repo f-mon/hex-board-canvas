@@ -49,6 +49,7 @@ export class GameModel {
   public boardModel: BoardModel;
 
   private _selectedTileType: TileType;
+  private _state: 'MAP_DRAWING' | 'EDIT_TILES_PALETTE' = 'EDIT_TILES_PALETTE';
   showGamePanel: boolean = false;
 
   private updates = new Subject<GameModel>();
@@ -79,14 +80,29 @@ export class GameModel {
 
   selectTileType(tileType: TileType) {
     this._selectedTileType = tileType;
+    this.setDrawingMapState();
   }
 
   isDrawingMapState(): boolean {
-    return !!this._selectedTileType;
+    return this._state === 'MAP_DRAWING';
+  }
+  setDrawingMapState(): boolean {
+    if (this._state !== 'MAP_DRAWING') {
+      this._state = 'MAP_DRAWING';
+      this.notifyChanged();
+      return true;
+    }
   }
 
   isEditTilesPaletteState(): boolean {
-    return !this._selectedTileType;
+    return this._state === 'EDIT_TILES_PALETTE';
+  }
+  setEditTilesPaletteState(): boolean {
+    if (this._state !== 'EDIT_TILES_PALETTE') {
+      this._state = 'EDIT_TILES_PALETTE';
+      this.notifyChanged();
+      return true;
+    }
   }
 
   setCellTileType(row: number, col: number, tileType: TileType): boolean {
