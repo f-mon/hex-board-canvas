@@ -1,12 +1,13 @@
 import { Observable, Subject } from 'rxjs';
 import { TileType } from '../model/cell-models';
 import { Rect } from '../model/geom';
+import { ImageUtils } from './image-utils';
 
 export class AssetsLoader {
   tileMap: HTMLImageElement;
   private _loaded: boolean = false;
 
-  readonly tiles: TileType[] = [];
+  private _tiles: TileType[] = [];
   private nextKey: number = 0;
 
   private updates = new Subject<any>();
@@ -22,7 +23,7 @@ export class AssetsLoader {
   constructor() {}
 
   async initialize(): Promise<any> {
-    this.tileMap = await this.imageLoad(
+    this.tileMap = await ImageUtils.imageLoad(
       'https://raw.githubusercontent.com/f-mon/hex-board-canvas/master/images/tileMap.png'
     );
     await this.reloadTiles();
@@ -31,40 +32,29 @@ export class AssetsLoader {
   }
 
   private async reloadTiles(): Promise<any> {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith('tile_image_')) {
-        const imgNum = parseInt(key.substring(11));
-        this.nextKey = Math.max(imgNum, this.nextKey);
-        const canvasTile = await this.dataUrlToCanvas(
-          localStorage.getItem(key)
-        );
-        this.tiles.push({
-          index: imgNum,
-          name: key,
-          canvas: canvasTile,
-        });
-      }
-    }
-    this.tiles.sort((a, b) => a.index - b.index);
-    console.log(this.tiles);
+    const tiles = await TileType.reloadTilesFromLocalStorage();
+    this.nextKey = Math.max(...tiles.map((t) => t.index));
+    this._tiles = tiles;
   }
 
-  private async dataUrlToCanvas(dataUrl: string): Promise<HTMLCanvasElement> {
-    const img = await this.imageLoad(dataUrl);
-    const tileCanvas = document.createElement('canvas');
-    tileCanvas.width = img.width;
-    tileCanvas.height = img.height;
-    const ctx = tileCanvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    return tileCanvas;
+  get tiles(): TileType[] {
+    return this._tiles;
   }
 
   get loaded(): boolean {
     return this._loaded;
   }
 
-  createMapTile(rect: Rect) {
+  deleteTileType(tileType: TileType) {
+    const idx = this.tiles.indexOf(tileType);
+    if (idx >= 0) {
+      const [deleted] = this.tiles.splice(idx, 1);
+      deleted.deleteFromLocalStorage();
+      this.notifyChanged();
+    }
+  }
+
+  createMapTile(rect: Rect): TileType {
     const tileMapCanvas = document.createElement('canvas');
     tileMapCanvas.width = rect.width;
     tileMapCanvas.height = rect.height;
@@ -81,29 +71,11 @@ export class AssetsLoader {
       rect.height
     );
     this.nextKey++;
-    const tileName = 'tile_image_' + this.nextKey;
-    this.tiles.push({
-      index: this.nextKey,
-      name: tileName,
-      canvas: tileMapCanvas,
-    });
-    localStorage.setItem(tileName, tileMapCanvas.toDataURL());
+    const newTileType = new TileType(this.nextKey, tileMapCanvas);
+    this.tiles.push(newTileType);
+    newTileType.persistToLocalStorage();
     this.notifyChanged();
-  }
-
-  imageLoad(imgSrc: string): Promise<HTMLImageElement> {
-    return new Promise((resolve, reject) => {
-      const img = new Image(); // Create new img element
-      img.crossOrigin = 'anonymous';
-      img.addEventListener(
-        'load',
-        () => {
-          resolve(img);
-        },
-        false
-      );
-      img.src = imgSrc;
-    });
+    return newTileType;
   }
 
   getTileTypeByName(tileTypeName: string): TileType {

@@ -1,11 +1,42 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 import { AssetsLoader } from '../services/assets-loader';
 import { Tile } from './geom';
+import { ImageUtils } from '../services/image-utils';
 
 export class TileType {
-  name: string;
-  canvas: HTMLCanvasElement;
-  index: number;
+  constructor(
+    public readonly index: number,
+    public readonly canvas: HTMLCanvasElement
+  ) {}
+
+  get name(): string {
+    return 'tile_image_' + this.index;
+  }
+
+  persistToLocalStorage() {
+    localStorage.setItem(this.name, this.canvas.toDataURL());
+  }
+
+  deleteFromLocalStorage() {
+    localStorage.removeItem(this.name);
+  }
+
+  static async reloadTilesFromLocalStorage(): Promise<Array<TileType>> {
+    const result = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith('tile_image_')) {
+        const index = parseInt(key.substring(11));
+        const canvasTile = await ImageUtils.dataUrlToCanvas(
+          localStorage.getItem(key)
+        );
+        result.push(new TileType(index, canvasTile));
+      }
+    }
+    result.sort((a, b) => a.index - b.index);
+    console.log(result);
+    return result;
+  }
 }
 
 export class GameModel {

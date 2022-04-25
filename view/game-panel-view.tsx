@@ -72,6 +72,12 @@ export class GamePanel extends Component<any, GamePanelState> {
     this.setState(this.state);
   }
 
+  deleteTile(tileType: TileType, event: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.assetsLoader.deleteTileType(tileType);
+  }
+
   renderTileDiv(tileImage: TileType) {
     const src = tileImage.canvas.toDataURL();
     const isSelected = this.state.gameModel.isSelectedTileType(tileImage);
@@ -87,6 +93,18 @@ export class GamePanel extends Component<any, GamePanelState> {
           src={src}
           title={tileImage.name}
         />
+        {isSelected ? (
+          <div>
+            <button
+              type="button"
+              onClick={(event) => this.deleteTile(tileImage, event)}
+            >
+              Delete
+            </button>
+          </div>
+        ) : (
+          ''
+        )}
       </div>
     );
   }
