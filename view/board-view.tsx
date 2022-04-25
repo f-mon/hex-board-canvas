@@ -269,7 +269,7 @@ export class Board extends Component<BoardProps, BoardState> {
 
   private drawHex(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
     if (this.state.boardModel.gameModel.isDrawingMapState()) {
-      const tt = this.state.boardModel.gameModel.selectedTileType;.
+      const tt = this.state.boardModel.gameModel.selectedTileType;
       if (tt) {
         this.drawHexTileTerrain(hexTile, tt, ctx);
       }
