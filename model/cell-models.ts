@@ -74,6 +74,10 @@ export class GameModel {
     return this._selectedTileType;
   }
 
+  get state(): string {
+    return this._state;
+  }
+
   isSelectedTileType(tileType: TileType): boolean {
     return this._selectedTileType === tileType;
   }

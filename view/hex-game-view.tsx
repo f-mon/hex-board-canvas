@@ -25,6 +25,7 @@ export class HexGame extends Component<any, HexGameState> {
       this.setState({
         gameModel: gameModel,
       });
+
       gameModel.onUpdate().subscribe((gm) => {
         this.setState({
           gameModel: gm,

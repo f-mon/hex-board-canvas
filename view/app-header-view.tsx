@@ -45,6 +45,7 @@ export class AppHeader extends Component<AppHeaderProps, AppHeaderState> {
   render() {
     return (
       <div className="appheader">
+        {this.state.gameModel.state}
         <div className="spacer"></div>
         <button type="button" onClick={this.toggleState}>
           {this.state.gameModel.isEditTilesPaletteState()
