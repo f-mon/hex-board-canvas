@@ -213,9 +213,11 @@ export class Board extends Component<BoardProps, BoardState> {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //canvas.width = canvas.width;
 
-    if (this.state.gameModel.isEditTilesPaletteState()) {
+    if (this.state.boardModel.gameModel.isEditTilesPaletteState()) {
+      //ctx.fill(p.path());
+      ctx.drawImage(this.assetsLoader.tileMap, 0, 0);
     }
-    if (this.state.gameModel.isDrawingMapState()) {
+    if (this.state.boardModel.gameModel.isDrawingMapState()) {
       this.drawHexCells(ctx);
     }
     this.drawGrid(ctx);
@@ -281,13 +283,6 @@ export class Board extends Component<BoardProps, BoardState> {
       if (tt) {
         this.drawHexTileTerrain(hexTile, tt, ctx);
       }
-    } else {
-      //ctx.fill(p.path());
-      const p = this.getHexTilePolygonCoords(hexTile);
-      ctx.save();
-      ctx.clip(p.path());
-      ctx.drawImage(this.assetsLoader.tileMap, 0, 0);
-      ctx.restore();
     }
   }
 
