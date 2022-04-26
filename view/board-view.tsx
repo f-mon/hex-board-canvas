@@ -213,14 +213,18 @@ export class Board extends Component<BoardProps, BoardState> {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //canvas.width = canvas.width;
 
-    this.drawHexCells(ctx);
+    if (this.state.gameModel.isEditTilesPaletteState()) {
+    }
+    if (this.state.gameModel.isDrawingMapState()) {
+      this.drawHexCells(ctx);
+    }
     this.drawGrid(ctx);
 
     //const hoverTile = this.hoverTile;
     const hoverHex = this.hoverHex;
 
     if (hoverHex) {
-      this.drawHex(hoverHex, ctx);
+      this.drawHoverHex(hoverHex, ctx);
     }
   }
 
@@ -271,7 +275,7 @@ export class Board extends Component<BoardProps, BoardState> {
     }
   }
 
-  private drawHex(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
+  private drawHoverHex(hexTile: HexTile, ctx: CanvasRenderingContext2D) {
     if (this.state.boardModel.gameModel.isDrawingMapState()) {
       const tt = this.state.boardModel.gameModel.selectedTileType;
       if (tt) {
