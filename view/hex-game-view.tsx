@@ -6,6 +6,7 @@ import { AssetsLoader } from '../services/assets-loader';
 import { Board } from './board-view';
 import { AppHeader } from './app-header-view';
 import { GamePanel } from './game-panel-view';
+import { MasterConnectionPeer } from '../services/master-connection-peer';
 
 interface HexGameState {
   gameModel: GameModel;
@@ -25,13 +26,14 @@ export class HexGame extends Component<any, HexGameState> {
       this.setState({
         gameModel: gameModel,
       });
-
       gameModel.onUpdate().subscribe((gm) => {
         this.setState({
           gameModel: gm,
         });
       });
     });
+    const masterConnectionPeer = new MasterConnectionPeer();
+    masterConnectionPeer.initialize();
   }
 
   render() {
