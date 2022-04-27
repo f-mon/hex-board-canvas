@@ -5,10 +5,12 @@ import { CellModel, BoardModel, GameModel } from '../model/cell-models';
 import { Cell } from './cell-view';
 import { Point, Location, Tile, HexTile, Line } from '../model/geom';
 import { AssetsLoader } from '../services/assets-loader';
+import { ConnectionPeer } from '../model/connection-peers';
 
 interface AppHeaderProps {
   gameModel: GameModel;
-  assetsLoader: AssetsLoader;
+  assetsLoader?: AssetsLoader;
+  connectionPeer?: ConnectionPeer;
 }
 interface AppHeaderState {
   gameModel: GameModel;

@@ -8,18 +8,30 @@ import { AppHeader } from './app-header-view';
 import { GamePanel } from './game-panel-view';
 import { PlayerConnectionPeer } from '../services/player-connection-peer';
 
-interface HexGameSlaveState {
+interface HexGamePlayerState {
   gameModel: GameModel;
 }
 
-export class HexGameSlave extends Component<any, HexGameSlaveState> {
+export class HexGamePlayer extends Component<any, HexGamePlayerState> {
+
+  private playerConnectionPeer: PlayerConnectionPeer;
+
   constructor(props: any) {
     super(props);
-    const playerConnectionPeer = new PlayerConnectionPeer();
-    playerConnectionPeer.initialize();
+    this.playerConnectionPeer = new PlayerConnectionPeer();
+    this.playerConnectionPeer.initialize();
   }
 
   render() {
-    return <div className="hexgame">Slave Mode</div>;
+    return (
+      <div className="hexgame">
+        <AppHeader
+          gameModel={this.state.gameModel}
+          connectionPeer={this.playerConnectionPeer}
+        />
+        <div className="hexgame-container">
+        </div>
+      </div>
+    );
   }
 }

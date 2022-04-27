@@ -1,22 +1,49 @@
 import Peer from 'peerjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { ConnectionPeer, ConnectionStatus } from '../model/connection-peers';
 
-export class PlayerConnectionPeer {
+export class PlayerConnectionPeer implements ConnectionPeer {
+  private peer: Peer;
+  private status: Subject<ConnectionStatus> = new BehaviorSubject(
+    'NOT_CONNECTED'
+  );
+  private masterConnection: Peer.DataConnection;
+
   constructor() {}
+
+  get $status(): Observable<ConnectionStatus> {
+    return this.status.asObservable();
+  }
 
   async initialize() {
     await this.waitForScript();
     const playerId =
       new Date().getTime() + '_' + Math.floor(Math.random() * 1000);
-    var peer = await this.createPeer('hexPlayer_' + playerId);
-    console.log('peer opened ', peer.id);
+    this.peer = await this.createPeer('hexPlayer_' + playerId);
+    console.log('peer opened ', this.peer.id);
+    this.tryConnectToMaster('hexGameMaster');
+  }
 
-    const masterConnection = peer.connect('hexGameMaster');
+  private tryConnectToMaster(masterPeerId: string) {
+    const masterConnection = this.peer.connect(masterPeerId);
+    this.status.next('CONNECTING');
     masterConnection.on('open', () => {
+      this.status.next('CONNECTED');
       console.log('masterConnection opened');
-      masterConnection.send("pippo message");
+      this.masterConnection = masterConnection;
+      masterConnection.send('pippo message');
     });
     masterConnection.on('data', (data) => {
       console.log('masterConnection data ', data);
+    });
+    masterConnection.on('close', () => {
+      this.status.next('NOT_CONNECTED');
+      console.log('masterConnection closed ');
+      this.masterConnection = null;
+      setTimeout(() => this.tryConnectToMaster(masterPeerId), 2000);
+    });
+    masterConnection.on('error', () => {
+      console.log('masterConnection error ');
     });
   }
 

@@ -14,6 +14,7 @@ interface HexGameState {
 
 export class HexGame extends Component<any, HexGameState> {
   assetsLoader: AssetsLoader;
+  masterConnectionPeer: MasterConnectionPeer;
 
   constructor(props: any) {
     super(props);
@@ -32,8 +33,8 @@ export class HexGame extends Component<any, HexGameState> {
         });
       });
     });
-    const masterConnectionPeer = new MasterConnectionPeer();
-    masterConnectionPeer.initialize();
+    this.masterConnectionPeer = new MasterConnectionPeer();
+    this.masterConnectionPeer.initialize();
   }
 
   render() {
@@ -45,6 +46,7 @@ export class HexGame extends Component<any, HexGameState> {
         <AppHeader
           gameModel={this.state.gameModel}
           assetsLoader={this.assetsLoader}
+          connectionPeer={this.masterConnectionPeer}
         />
         <div className="hexgame-container">
           <Board
