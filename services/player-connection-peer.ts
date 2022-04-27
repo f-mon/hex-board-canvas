@@ -1,25 +1,22 @@
 import Peer from 'peerjs';
 
-export class MasterConnectionPeer {
+export class PlayerConnectionPeer {
   constructor() {}
 
   async initialize() {
     await this.waitForScript();
-    var masterPeer = await this.createPeer('hexGameMaster');
-    console.log('peer opened ', masterPeer.id);
-    masterPeer.on('connection', function (playerConnection) {
-      playerConnection.on('open', () => {
-        console.log('playerConnection opened ', playerConnection.peer);
-      });
-      playerConnection.on('data', (data) => {
-        console.log('data from player connection received', data);
-      });
-      playerConnection.on('close', () => {
-        console.log('playerConnection closed ', playerConnection.peer);
-      });
-      playerConnection.on('error', () => {
-        console.log('playerConnection error ', playerConnection.peer);
-      });
+    const playerId =
+      new Date().getTime() + '_' + Math.floor(Math.random() * 1000);
+    var peer = await this.createPeer('hexPlayer_' + playerId);
+    console.log('peer opened ', peer.id);
+
+    const masterConnection = peer.connect('hexGameMaster');
+    masterConnection.on('open', () => {
+      console.log('masterConnection opened');
+      masterConnection.send("pippo message");
+    });
+    masterConnection.on('data', (data) => {
+      console.log('masterConnection data ', data);
     });
   }
 
